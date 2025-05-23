@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../redux/Slices/userDataSlice';
 const Poll = ({ poll, id, postId = null, rooms = new Set() }) => {
-  const { userData, domain, socket } = useContext(LoginContext);
+  const { domain, socket } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
   const [votes, setVotes] = useState({
     totalVotes: Object.keys(poll?.voters || {}).length,
     voters: poll?.voters || {},

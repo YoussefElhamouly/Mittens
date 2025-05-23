@@ -1,12 +1,12 @@
 import Users from "../db/usersSchema.js";
 import Conversation from "../db/conversationSchema.js";
 import Messages from "../db/messagesSchema.js";
-import { handleError, throwError } from "../utils/helperFunctions.js";
+import { throwError } from "../utils/helperFunctions.js";
 import { getIO, usersSockets } from "../socket.js";
 import { handleAttachments } from "../utils/processFIles.js";
 import mongoose from "mongoose";
 
-const LoadChats = async (req, res) => {
+const LoadChats = async (req, res, next) => {
   try {
     const { filter } = req.query;
     const user_id = req.session.user_id;
@@ -179,11 +179,11 @@ const LoadChats = async (req, res) => {
       return res.json(chats);
     }
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const LoadMessages = async (req, res) => {
+const LoadMessages = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { userTag } = req.params;
@@ -256,8 +256,7 @@ const LoadMessages = async (req, res) => {
       );
     return res.json(findMessages);
   } catch (err) {
-    // handleError(err);
-    console.log(err);
+    next(err);
   }
 };
 
@@ -272,7 +271,7 @@ const MarkMessageAsSeen = async (latestMessage, sender, recipient) => {
     { isSeen: true }
   );
 };
-const CreateMessage = async (req, res) => {
+const CreateMessage = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const senderUserTag = req.session.userTag;
@@ -320,9 +319,9 @@ const CreateMessage = async (req, res) => {
         );
         break;
     }
-    return res.status(200).json({});
+    return res.status(201).json({});
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 
   async function addMessage(sender, body, recipient) {

@@ -1,9 +1,9 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import ViewImageWindow from '../window/ViewImageWindow.jsx';
-import { LoginContext } from '../contexts/LoginContext.jsx';
+import { SocketContext } from '../contexts/SocketContext.jsx';
 
 const Image = ({ src, slider = false, img }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   const [isMessageImageLoading, setIsMessageImageLoading] = useState(true);
   const [viewImageWindow, setViewImageWindow] = useState(false);
   const [skeletonSize, setSkeletonSize] = useState('auto');

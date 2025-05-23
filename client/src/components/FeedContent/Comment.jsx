@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import ShowMoreText from '../MediaPlayers/ShowMoreText';
 import { handleRequest, timeDifference } from '../../utils/helperFunctions';
-import { LoginContext } from '../contexts/LoginContext';
 import { Link } from 'react-router-dom';
 import Image from '../MediaPlayers/Image';
 import VideoPlayer from '../MediaPlayers/VideoPlayer';
@@ -9,8 +8,11 @@ import Slider from '../MediaPlayers/Slider';
 import AreYouSureWindow from '../window/AreYouSureWindow';
 import SmallMenu from './SmallMenu';
 import { formatDate } from '../../utils/helperFunctions';
+import { useSelector } from 'react-redux';
+import { SocketContext } from '../contexts/SocketContext';
 const Comment = ({ comment_id, interactions, createdAt, commentedBy, post_id, commentBody, comments, setComments }) => {
-  const { domain, userData, socket } = useContext(LoginContext);
+  const { domain, socket } = useContext(SocketContext);
+  const userData = useSelector((state) => state.userData.userData);
   const [InteractionsCount, setPostInteractionsCount] = useState(interactions.likes.count);
   const [LikesCount, setLikesCount] = useState(interactions.likes.count);
   const [likeStaus, setLikeStatus] = useState(interactions.likes.isInteracted);

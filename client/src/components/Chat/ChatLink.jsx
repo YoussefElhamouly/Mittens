@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect, useContext } from 'react';
 
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
 import { formatDate, timeDifference } from '../../utils/helperFunctions';
 import { ActiveChatContext } from '../contexts/ActiveChatContext';
 const ChatLink = ({ userTag, firstName, lastName, unReadMsg, lastMsg, lastMsgDate, _id }) => {
   const { activeChat, setActiveChat, setChatLinks, setSlideChat, filter } = useContext(ActiveChatContext);
-  const { domain, socket } = useContext(LoginContext);
+  const { domain, socket } = useContext(SocketContext);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [unReadMessages, setUnReadMessages] = useState(unReadMsg);
   const [lastMessage, setLastMessage] = useState(lastMsg);

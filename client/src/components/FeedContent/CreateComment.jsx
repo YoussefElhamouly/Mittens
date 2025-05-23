@@ -3,12 +3,14 @@ import ImagePreview from '../Previews/ImagePreview';
 import MessageWindow from '../window/MessageWindow';
 import useUploadFiles from '../hooks/UseUploadFiles';
 import VideoPreview from '../Previews/VideoPreview';
-import { LoginContext } from '../contexts/LoginContext';
+
 import { handleRequest } from '../../utils/helperFunctions';
 import EmojiPicker from 'emoji-picker-react';
-
+import { useSelector } from 'react-redux';
+import { SocketContext } from '../contexts/SocketContext';
 const CreateComment = ({ id, setComments }) => {
-  const { userData, domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector((state) => state.userData.userData);
   const [emoPickerWindow, setEmoPickerWindow] = useState(false);
   const [textAreaVal, setTextAreaVal] = useState('');
   const pickerRef = useRef();

@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { LoginContext } from '../contexts/LoginContext';
+
+import { SocketContext } from '../contexts/SocketContext';
 import { timeDifference } from '../../utils/helperFunctions';
 
 const NotificationIcon = ({ action }) => {
@@ -72,7 +73,7 @@ const NotificationMessage = ({ details }) => {
 };
 
 const Notification = ({ details, sender, createdAt, isSeen }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   return (
     <div className={'notification-block'}>

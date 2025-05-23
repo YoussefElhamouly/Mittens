@@ -3,8 +3,11 @@ import Notification from './Notification';
 import NotificationsSettings from './NotificationsSettings';
 import NotificationSkeleton from '../skeletons/NotificationSkeleton';
 import { handleRequest } from '../../utils/helperFunctions';
-import { LoginContext } from '../contexts/LoginContext';
-const Notifications = ({ setunReadNotificationCount, setIsNotificationsMuted, isNotificationsMuted, menuRef }) => {
+import { SocketContext } from '../contexts/SocketContext';
+import { setUnReadNotificationsCount } from '../../Redux/Slices/userDataSlice';
+import { useDispatch } from 'react-redux';
+const Notifications = ({ setIsNotificationsMuted, isNotificationsMuted, menuRef }) => {
+  const dispatch = useDispatch();
   const [settingsMenu, setSettingsMenu] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsloading] = useState(false);
@@ -13,8 +16,8 @@ const Notifications = ({ setunReadNotificationCount, setIsNotificationsMuted, is
 
   const fetchSignlaRef = useRef();
   const skeletonRef = useRef();
-  const { socket } = useContext(LoginContext);
-  const socketRef = useRef(socket.current);
+  const { socket } = useContext(SocketContext);
+
   const fetchedNotifications = useRef(new Set());
 
   useEffect(() => {
@@ -42,15 +45,15 @@ const Notifications = ({ setunReadNotificationCount, setIsNotificationsMuted, is
   }, []);
 
   useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on('notification', (data) => {
+    if (socket.current) {
+      socket.current.on('notification', (data) => {
         fetchedNotifications.current.add(data._id);
         setNotifications((prev) => [data, ...prev]);
       });
     }
     return () => {
-      if (socketRef.current) {
-        socketRef.current.off('notification ');
+      if (socket.current) {
+        socket.current.off('notification ');
       }
     };
   }, []);
@@ -72,7 +75,7 @@ const Notifications = ({ setunReadNotificationCount, setIsNotificationsMuted, is
       (data) => {
         data.forEach((noti) => fetchedNotifications.current.add(noti._id));
         setNotifications((prev) => [...prev, ...data]);
-        setunReadNotificationCount(0);
+        dispatch(setUnReadNotificationsCount(0));
         if (data.length < 10) setNoMoreNotifications(true);
       },
       (err) => {}

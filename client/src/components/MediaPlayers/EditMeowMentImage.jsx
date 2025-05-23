@@ -1,10 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import ViewImageWindow from '../window/ViewImageWindow.jsx';
-import { LoginContext } from '../contexts/LoginContext.jsx';
-import Loader from '../Loader.jsx';
 
+import Loader from '../Loader.jsx';
+import { SocketContext } from '../contexts/SocketContext.jsx';
 const EditMeowMentImage = ({ src, onSplice, alreadyUploaded, onfinish }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   const [viewImageWindow, setViewImageWindow] = useState(false);
   const [loadStatus, setLoadStatus] = useState();
   const [imageUploadStroke, setImageUploadStroke] = useState();

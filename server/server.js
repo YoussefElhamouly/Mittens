@@ -1,6 +1,5 @@
 import express from "express";
 import { initSocketIO } from "./socket.js"; // Import the function
-import mongoose from "mongoose";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import posts from "./routes/posts.js";
@@ -11,8 +10,9 @@ import { createServer } from "http"; // Import http module to create server
 import comments from "./routes/comments.js";
 import chats from "./routes/chats.js";
 import MongoStore from "connect-mongo";
-
+import { handleErrors } from "./middlewares/errorHandler.js";
 import "./test.js";
+import { connectDB, MONGODB_URI } from "./utils/connectDb.js";
 
 import {
   LoadImage,
@@ -21,25 +21,28 @@ import {
   LoadVideo,
 } from "./utils/helperFunctions.js";
 
+const SESSION_SECRET = process.env.SESSION_SECRET || "";
+const COOKIE_SECRET = process.env.COOKIE_SECRET || "";
+const PORT = process.env.PORT || 3000;
 const app = express();
 const server = createServer(app);
 initSocketIO(server);
 
-mongoose.connect("mongodb://localhost:27017/kitty");
+connectDB(); //db connection
 
 const sessionMiddleware = session({
-  secret: "your-secret-key",
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
-    mongoUrl: "mongodb://localhost:27017/kitty",
+    mongoUrl: MONGODB_URI,
     collectionName: "sessions",
   }),
   cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 * 3, httpOnly: true },
 });
 app.use(sessionMiddleware);
 
-app.use(cookieParser("for real yoo"));
+app.use(cookieParser(COOKIE_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,5 +56,6 @@ app.get("/loadImage/:type/:id", LoadImage);
 app.get("/LoadMeowment/:id/:key", LoadMeowment);
 app.get("/loadVideo/:type/:id", LoadVideo);
 
-server.listen(3000);
+app.use(handleErrors);
+server.listen(PORT);
 export { sessionMiddleware };

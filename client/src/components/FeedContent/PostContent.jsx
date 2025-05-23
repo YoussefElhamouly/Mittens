@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import Image from '../MediaPlayers/Image';
 import VideoPlayer from '../MediaPlayers/VideoPlayer';
 import Slider from '../MediaPlayers/Slider';
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
 import Event from '../MediaPlayers/Event';
 import Poll from '../MediaPlayers/Poll';
 const PostContent = ({ image, video, postType, event, poll, id, postId, rooms }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
 
   return (
     <>

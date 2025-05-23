@@ -34,8 +34,8 @@ const InfoWindow = ({ dataToDisplay, onClose, type }) => {
           </svg>
         </button>
         <div className="info-container">
-          {dataToDisplay.map((data) => {
-            return <InfoBlock data={data} />;
+          {dataToDisplay.map((data, i) => {
+            return <InfoBlock data={data} key={i} />;
           })}
         </div>
       </div>

@@ -3,9 +3,12 @@ import { createPortal } from 'react-dom';
 import PostContent from '../FeedContent/PostContent';
 import ShowMoreText from '../MediaPlayers/ShowMoreText';
 import MessageWindow from './MessageWindow';
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../redux/Slices/userDataSlice';
 const RemeowWindow = ({ postType, event, poll, text, video, image, postId, postedBy, onClose, setPosts, setRemeowStatus }) => {
-  const { domain, userData } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
   const textAreaRef = useRef();
   const [isLoading, setIsLoading] = useState(100);
   const [errors, setErrors] = useState();

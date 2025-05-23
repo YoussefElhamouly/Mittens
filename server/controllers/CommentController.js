@@ -10,14 +10,13 @@ import { __uploads } from "../config.js";
 import { unlink } from "fs/promises";
 import {
   addPawprint,
-  handleError,
   throwError,
   broadcastNotifications,
 } from "../utils/helperFunctions.js";
 
 import { handleAttachments } from "../utils/processFIles.js";
 
-const CreateComment = async (req, res) => {
+const CreateComment = async (req, res, next) => {
   try {
     const { post_id } = req.params;
     let id = post_id;
@@ -56,9 +55,9 @@ const CreateComment = async (req, res) => {
         );
         break;
     }
-    return res.status(200).json({});
+    return res.status(201).json({});
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 
   async function addComment(commentBody, poster, id) {
@@ -122,7 +121,7 @@ const CreateComment = async (req, res) => {
     io.to(id).emit("comment", formattedComment);
   }
 };
-const LoadComments = async (req, res) => {
+const LoadComments = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const limit = req.query?.limit || 4;
@@ -174,11 +173,11 @@ const LoadComments = async (req, res) => {
       throwError("An error occurred while loading the comments", 500);
     }
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const DeleteComment = async (req, res) => {
+const DeleteComment = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { post_id, comment_id } = req.params;
@@ -221,7 +220,7 @@ const DeleteComment = async (req, res) => {
 
     return res.status(200).json({});
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 

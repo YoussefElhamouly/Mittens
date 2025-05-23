@@ -2,14 +2,18 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import EditPorfilePictureWindow from '../window/EditPorfilePictureWindow';
 import MessageWindow from '../window/MessageWindow';
 import EditProfileWindow from '../window/EditProfileWindow';
-import { LoginContext } from '../contexts/LoginContext';
+
+import { SocketContext } from '../contexts/SocketContext';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../redux/Slices/userDataSlice';
 import ProfileHeaderSkeleton from '../skeletons/ProfileHeaderSkeleton';
 import { ProfileDataContext } from '../contexts/ProfileDataContext';
 import FollowListWindow from '../window/FollowListWindow';
 const UserProfileHeader = () => {
   const { fetchedUserData, isFetching, filter, setFilter, coverPhoto, setCoverPhoto, profilePhoto, setProfilePhoto } = useContext(ProfileDataContext);
   const searchedUser = fetchedUserData;
-  const { domain, userData } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
 
   const [editPfpWindow, setEditPfpWindow] = useState(false);
   const [errorsWindow, setErrorsWindow] = useState(null);

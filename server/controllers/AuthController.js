@@ -2,22 +2,28 @@ import EmailVerification from "../db/emailVerificationSchema.js";
 import { getUserAgentData } from "../utils/helperFunctions.js";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
-import { handleError, throwError } from "../utils/helperFunctions.js";
+import { throwError } from "../utils/helperFunctions.js";
 import { hash } from "bcrypt";
 import Users from "../db/usersSchema.js";
 import path from "path";
-import { __uploads } from "../config.js";
+import { __uploads, __dirname } from "../config.js";
 import { body, validationResult } from "express-validator";
+
 import fs from "fs/promises";
+import ejs from "ejs";
+
+const TRANSPORTER_EMAIL = process.env.TRANSPORTER_EMAIL || "";
+const TRANSPORTER_PASSWORD = process.env.TRANSPORTER_PASSWORD || "";
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "youssefelhamoly@gmail.com",
-    pass: "lfvnldkgtbvakxkb",
+    user: TRANSPORTER_EMAIL,
+    pass: TRANSPORTER_PASSWORD,
   },
 });
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -38,15 +44,15 @@ const register = async (req, res) => {
     });
     await verification.save();
     await sendVerificationEmail(email, verification.verificationCode);
-    res.status(200).json({
+    res.status(201).json({
       message: "Please check your email for verification.",
     });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-async function verifyCode(req, res) {
+async function verifyCode(req, res, next) {
   try {
     await body("verificationCode").isString().notEmpty().run(req);
     if (!validationResult(req).isEmpty())
@@ -103,25 +109,29 @@ async function verifyCode(req, res) {
     ]);
 
     return res
-      .status(200)
+      .status(201)
       .json({ message: "Email verified and user registered successfully" });
   } catch (error) {
-    handleError(res, error);
+    next(error);
   }
 }
 
-async function sendVerificationEmail(userEmail, verificationCode) {
+async function sendVerificationEmail(
+  userEmail,
+  verificationCode,
+  user = "user"
+) {
   try {
+    const html = await ejs.renderFile(
+      path.join(__dirname, "/views/verificationEmail.ejs"),
+      { user, verificationCode }
+    );
     const mailOptions = {
-      from: "youssefelhamoly@gmail.com",
+      from: TRANSPORTER_EMAIL,
       to: userEmail,
       subject: "Email Verification Code",
       text: "",
-      html: `<div style="padding: 3rem; background-color: #1b2730; display: flex; flex-direction: column; gap: 1rem; justify-content: center; align-items: center; border-radius: 0.8em;">
-            <h1 style="color: #95a3b1; line-height: 25px; font-size: 1.05rem;">
-                Please use the following code to verify your email: <span style="color: #348fc8;">${verificationCode}</span>!
-            </h1>
-        </div>`,
+      html: html,
     };
 
     await transporter.sendMail(mailOptions);
@@ -130,13 +140,13 @@ async function sendVerificationEmail(userEmail, verificationCode) {
   }
 }
 
-async function logout(req, res) {
+async function logout(req, res, next) {
   try {
     req.session.destroy();
     res.clearCookie("connect.sid");
     res.status(200).json({ message: "Logout successful" });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 }
 

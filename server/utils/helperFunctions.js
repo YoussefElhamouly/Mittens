@@ -35,12 +35,6 @@ const throwError = (message, status, details) => {
   throw error;
 };
 
-function handleError(res, err) {
-  return res.status(err.status || 500).json({
-    message: err?.message || "Unknown error occurred",
-    details: err?.details || null,
-  });
-}
 function timeDifference(pastTime) {
   const now = new Date();
   const diffInSeconds = Math.floor((now - new Date(pastTime)) / 1000);
@@ -84,7 +78,6 @@ function processVideo(inputPath, outputPath) {
 
 function getVideoMetadata(filePath) {
   return new Promise((resolve) => {
-    // Check if ffprobe is available
     if (!ffmpeg.ffprobe) {
       console.warn("ffprobe not found. Returning unknown metadata.");
       return resolve({
@@ -379,7 +372,6 @@ export {
   timeDifference,
   LoadImage,
   LoadMeowment,
-  handleError,
   LoadVideo,
   broadcastNotifications,
   addPawprint,

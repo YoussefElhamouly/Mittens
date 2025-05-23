@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
 import NavBar from '../containers/NavBar';
 import Post from './Post';
 
@@ -6,8 +6,8 @@ import Skeleton from '../skeletons/Skeleton';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { throwError } from '../../utils/helperFunctions';
-import { useContext } from 'react';
-import { LoginContext } from '../contexts/LoginContext';
+
+import { SocketContext } from '../contexts/SocketContext';
 import MyProfile from '../Profile/MyProfile';
 import PeopleYouMayKnow from '../containers/PeopleYouMayKnow';
 import Trending from '../containers/Trending';
@@ -15,7 +15,7 @@ const PostSearchBlock = () => {
   const fetchIntervalRef = useRef(null);
   const [isLoading, setIsloading] = useState(true);
   const [post, setPost] = useState(null);
-  const { socket } = useContext(LoginContext);
+  const { socket } = useContext(SocketContext);
   const { id } = useParams();
   const nav = useNavigate();
   const fetchsinglaRef = useRef();

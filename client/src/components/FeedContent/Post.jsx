@@ -6,13 +6,17 @@ import RemeowWindow from '../window/RemeowWindow';
 import ShowMoreText from '../MediaPlayers/ShowMoreText';
 import CreateComment from './CreateComment';
 import { handleRequest, throwError, timeDifference } from '../../utils/helperFunctions';
-import { LoginContext } from '../contexts/LoginContext';
+
 import { Link } from 'react-router-dom';
 import { formatDate } from '../../utils/helperFunctions';
 import { formatNumber } from '../../utils/helperFunctions';
+import { SocketContext } from '../contexts/SocketContext';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../Redux/Slices/userDataSlice';
 import SmallMenu from './SmallMenu';
 const Post = ({ type, postBody, createdAt, interactions, isRemeow, post_id, postedBy, commentsCount, setPosts, posts, JoinedRooms }) => {
-  const { domain, userData, socket } = useContext(LoginContext);
+  const { domain, socket } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
   const [commentSection, setCommentSection] = useState(false);
   const [likeStatus, setLikeStatus] = useState(interactions.likes.isInteracted || false);
   const [saveStatus, setSaveStatus] = useState(interactions.saves.isInteracted || false);

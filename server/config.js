@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Posts } from "./db/postsSchema.js";
-import sharp from "sharp";
-import { getVideoMetadata } from "./utils/helperFunctions.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __uploads = path.join(__dirname, "uploads");
@@ -27,8 +24,7 @@ const deleteOldFiles = () => {
         }
 
         const fileAge = (now - stats.mtimeMs) / 1000;
-        // if (fileAge > 5 * 3600) {
-        if (fileAge > 5 * 60) {
+        if (fileAge > 5 * 3600) {
           fs.unlink(filePath, (err) => {
             if (err) {
               console.error("Error deleting file:", err);
@@ -42,8 +38,7 @@ const deleteOldFiles = () => {
   });
 };
 
-setInterval(deleteOldFiles, 1000);
-// setInterval(deleteOldFiles, 10 * 3600 * 1000);
+setInterval(deleteOldFiles, 1000 * 60 * 60);
 
 const checkForErrors = async () => {
   try {

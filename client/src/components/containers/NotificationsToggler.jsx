@@ -1,9 +1,12 @@
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef } from 'react';
 import { handleRequest } from '../../utils/helperFunctions';
-import { LoginContext } from '../contexts/LoginContext';
+
+import { useDispatch } from 'react-redux';
+import { setNotificationSettings } from '../../Redux/Slices/userDataSlice';
 const NotificationsToggler = ({ description, isToggled, type }) => {
+  const dispatch = useDispatch();
   const [isChecked, setIschecked] = useState(isToggled);
-  const { notificationSettings, setNotificationSettings } = useContext(LoginContext);
+
   const [isLoaing, setIsLoading] = useState(false);
   const fetchIntervalRef = useRef(null);
   const handleToggle = async (e) => {
@@ -18,7 +21,7 @@ const NotificationsToggler = ({ description, isToggled, type }) => {
       fetchIntervalRef,
       setIsLoading,
       (data) => {
-        setNotificationSettings(data?.notificationSettings);
+        dispatch(setNotificationSettings(data?.notificationSettings));
       },
       (err) => {
         console.log(err);

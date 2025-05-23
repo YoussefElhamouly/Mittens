@@ -1,22 +1,29 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { LoginContext } from '../contexts/LoginContext';
+
+import { SocketContext } from '../contexts/SocketContext';
 import Notifications from './Notifications';
 import Notification from './Notification';
 import UseOutsideClick from '../hooks/UseOutsideClick';
-import SearchWindow from '../window/SearchWindow';
+
 import Trending from './Trending';
+
 import PeopleYouMayKnow from './PeopleYouMayKnow';
 import LogoutWindow from '../window/LogoutWindow';
 import SearchResults from './SearchResults';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { incrementUnReadNotificationsCount, getUserData } from '../../Redux/Slices/userDataSlice';
 const NavBar = ({ page }) => {
+  const dispatch = useDispatch();
   const [notificationMenu, setNotificationMenu] = useState(false);
   const [isNotificationsMuted, setIsNotificationsMuted] = useState(JSON.parse(localStorage.getItem('isNotificationsMuted')) || false);
   const [searchWindow, setSearchWindow] = useState(false);
   const [trendingWindow, setTrendingWindow] = useState(false);
   const [peopleYouMayKnowWindow, setPeopleYouMayKnowWindow] = useState(false);
-  const { userData, domain, socket, unReadNotificationsCount, setUnReadNotificationsCount } = useContext(LoginContext);
+
+  const userData = useSelector(getUserData);
+
+  const { domain, socket } = useContext(SocketContext);
   const { tag } = useParams();
 
   const [popUpNotification, setPopUpNotification] = useState(null);
@@ -27,7 +34,7 @@ const NavBar = ({ page }) => {
       if (notificationMenu) return;
 
       setPopUpNotification(data);
-      setUnReadNotificationsCount((prev) => prev + 1);
+      dispatch(incrementUnReadNotificationsCount());
     };
 
     if (socket.current) {
@@ -39,7 +46,7 @@ const NavBar = ({ page }) => {
         socket.current.off('notification', handleNotification);
       }
     };
-  }, [notificationMenu, setUnReadNotificationsCount]);
+  }, [notificationMenu]);
 
   // useEffect(() => {
   //   setTimeout(() => {
@@ -166,13 +173,13 @@ const NavBar = ({ page }) => {
             {/* 
           {!!unReadnotificationsCount && <span className="notifications-circle">{unReadnotificationsCount}</span>} */}
 
-            <span className="notifications-circle" style={{ display: unReadNotificationsCount ? 'flex' : 'none' }}>
-              {unReadNotificationsCount > 9 && <span style={{ fontSize: '0.45rem' }}>+</span>}
-              {unReadNotificationsCount > 9 && '9'}
-              {unReadNotificationsCount <= 9 && unReadNotificationsCount}
+            <span className="notifications-circle" style={{ display: userData.unReadNotifications ? 'flex' : 'none' }}>
+              {userData.unReadNotifications > 9 && <span style={{ fontSize: '0.45rem' }}>+</span>}
+              {userData.unReadNotifications > 9 && '9'}
+              {userData.unReadNotifications <= 9 && userData.unReadNotifications}
             </span>
 
-            {notificationMenu && <Notifications menuRef={notificationsMenuRef} setunReadNotificationCount={setUnReadNotificationsCount} isNotificationsMuted={isNotificationsMuted} setIsNotificationsMuted={setIsNotificationsMuted} />}
+            {notificationMenu && <Notifications menuRef={notificationsMenuRef} isNotificationsMuted={isNotificationsMuted} setIsNotificationsMuted={setIsNotificationsMuted} />}
 
             {popUpNotification && !isNotificationsMuted && !lastPopUps.current.has(popUpNotification._id) && (
               <div className="pop-up-notification" key={popUpNotification._id}>

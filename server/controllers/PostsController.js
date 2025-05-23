@@ -9,7 +9,7 @@ import path from "path";
 import { __temp, __uploads } from "../config.js";
 import { randomBytes } from "crypto";
 import { param } from "express-validator";
-import { addPawprint, handleError } from "../utils/helperFunctions.js";
+import { addPawprint } from "../utils/helperFunctions.js";
 import { handleAttachments } from "../utils/processFIles.js";
 import {
   throwError,
@@ -18,9 +18,9 @@ import {
   updateUserEngagement,
 } from "../utils/helperFunctions.js";
 
-import redis from "../test.js";
+// import redis from "../test.js";
 
-const DeletePost = async (req, res) => {
+const DeletePost = async (req, res, next) => {
   const user_id = req.session.user_id;
   await param("id").trim().escape().run(req);
   const { id } = req.params;
@@ -63,7 +63,7 @@ const DeletePost = async (req, res) => {
 
     return res.status(200).json({});
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 
   async function deleteAttachments(attachedMedia) {
@@ -85,7 +85,7 @@ const DeletePost = async (req, res) => {
   }
 }; //finished
 
-const CreatePost = async (req, res) => {
+const CreatePost = async (req, res, next) => {
   const user_id = req.session.user_id;
   const { attachments, postText, event, poll } = req.body;
   try {
@@ -121,9 +121,7 @@ const CreatePost = async (req, res) => {
         break;
     }
   } catch (err) {
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 
   async function addPost(postBody, type, user_id) {
@@ -267,7 +265,7 @@ const CreatePost = async (req, res) => {
   }
 }; // semiFinished
 
-const RemeowPost = async (req, res) => {
+const RemeowPost = async (req, res, next) => {
   const userId = req.session.user_id;
   const { text } = req.body;
   const { id } = req.params;
@@ -390,17 +388,16 @@ const RemeowPost = async (req, res) => {
       });
       await broadcasrInteractions(id, "remeow");
 
-      return res.status(200).json(formattedPost);
+      return res.status(201).json(formattedPost);
     } catch (err) {
-      console.log(err);
       throwError("An error occurred while processing your post", 500);
     }
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 }; // finished
 
-const PollVote = async (req, res) => {
+const PollVote = async (req, res, next) => {
   const io = getIO();
   const userId = req.session.user_id;
   const { id } = req.params;
@@ -477,12 +474,11 @@ const PollVote = async (req, res) => {
       return res.status(500).send("Internal error during voting");
     }
   } catch (err) {
-    console.log(err.message);
-    return res.status(500).send("internal err");
+    next(err);
   }
 };
 
-const LoadPostsOld = async (req, res) => {
+const LoadPosts = async (req, res, next) => {
   try {
     const user_id = req.session.user_id || "2";
     const { filter } = req.query || null;
@@ -967,509 +963,512 @@ const LoadPostsOld = async (req, res) => {
 
     return res.json(result);
   } catch (err) {
-    console.log(err);
-    handleError(res, err);
+    next(err);
   }
 };
 
-const LoadPosts = async (req, res) => {
-  const user_id = req.session.user_id;
-  const { filter } = req.query || null;
-  const { user } = req.query || null;
-  const loadedPosts = req.body.loadedPosts || [];
+const LoadPostsOld = async (req, res, next) => {
+  try {
+    const user_id = req.session.user_id || "2";
+    const { filter } = req.query || null;
+    const { user } = req.query || null;
+    const loadedPosts = req.body.loadedPosts || [];
 
-  const skipCache = user || filter;
+    const skipCache = user || filter;
 
-  if (!skipCache) {
-    const cacheKey = `user:${user_id}:posts`;
-    const cachedPosts = await redis.lrange(cacheKey, 0, -1);
+    if (!skipCache) {
+      const cacheKey = user_id;
+      const cachedPosts = await redis.lrange(cacheKey, 0, -1);
 
-    if (cachedPosts.length > 0) {
-      const filteredCachedPosts = cachedPosts
-        .map((post) => JSON.parse(post))
-        .filter((post) => !loadedPosts.includes(post.post_id));
-      const result = filteredCachedPosts.slice(0, 15);
-      return res.json(result);
+      if (cachedPosts.length > 0) {
+        const filteredCachedPosts = cachedPosts
+          .map((post) => JSON.parse(post))
+          .filter((post) => !loadedPosts.includes(post.post_id));
+        const result = filteredCachedPosts.slice(0, 15);
+        return res.json(result);
+      }
     }
-  }
 
-  const findUserId = await Users.findOne({ userTag: user }, { user_id: 1 });
-  const findReqMaker = await Users.findOne({ user_id: user_id }).lean();
-  const algoStage = [
-    // { $sample: { size: 1 } },
-    {
-      $addFields: {
-        isFollowingAuthor: {
-          $gt: [
-            {
-              $getField: {
-                field: "$postedBy.user_id",
-                input: findReqMaker.following.users,
-              },
-            },
-            null,
-          ],
-        },
-        isFollowedByAuthor: {
-          $gt: [
-            {
-              $getField: {
-                field: "$postedBy.user_id",
-                input: findReqMaker.followers.users,
-              },
-            },
-            null,
-          ],
-        },
-        follwoingFactor: {
-          $ifNull: [
-            {
-              $getField: {
-                field: "$postedBy.user_id",
-                input: findReqMaker.following.users,
-              },
-            },
-            null,
-          ],
-        },
-        myEngagement: {
-          $ifNull: [
-            {
-              $getField: {
-                field: "$postedBy.user_id",
-                input: findReqMaker.engagements,
-              },
-            },
-            { interactionCount: 0, lastInteraction: null },
-          ],
-        },
-      },
-    },
-
-    {
-      $addFields: {
-        authorEngagement: {
-          $ifNull: [
-            `$postedBy.engagements.${user_id}`,
-            { interactionCount: 0, lastInteraction: null },
-          ],
-        },
-      },
-    },
-
-    {
-      $addFields: {
-        authorEngagementWeight: {
-          $switch: {
-            branches: [
+    const findUserId = await Users.findOne({ userTag: user }, { user_id: 1 });
+    const findReqMaker = await Users.findOne({ user_id: user_id }).lean();
+    const algoStage = [
+      // { $sample: { size: 1 } },
+      {
+        $addFields: {
+          isFollowingAuthor: {
+            $gt: [
               {
-                case: {
-                  $gte: [
-                    "$authorEngagement.lastInteraction",
-                    new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-                  ],
+                $getField: {
+                  field: "$postedBy.user_id",
+                  input: findReqMaker.following.users,
                 },
-                then: 0.3,
               },
-              {
-                case: {
-                  $gte: [
-                    "$authorEngagement.lastInteraction",
-                    new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-                  ],
-                },
-                then: 0.15,
-              },
-              {
-                case: {
-                  $gte: [
-                    "$authorEngagement.lastInteraction",
-                    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-                  ],
-                },
-                then: 0.08,
-              },
+              null,
             ],
-            default: 0,
           },
-        },
-        myEngagementWeight: {
-          $switch: {
-            branches: [
+          isFollowedByAuthor: {
+            $gt: [
               {
-                case: {
-                  $gte: [
-                    "$myEngagement.lastInteraction",
-                    new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-                  ],
+                $getField: {
+                  field: "$postedBy.user_id",
+                  input: findReqMaker.followers.users,
                 },
-                then: 0.5,
               },
-              {
-                case: {
-                  $gte: [
-                    "$myEngagement.lastInteraction",
-                    new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-                  ],
-                },
-                then: 0.2,
-              },
-              {
-                case: {
-                  $gte: [
-                    "$myEngagement.lastInteraction",
-                    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-                  ],
-                },
-                then: 0.1,
-              },
+              null,
             ],
-            default: 0,
+          },
+          follwoingFactor: {
+            $ifNull: [
+              {
+                $getField: {
+                  field: "$postedBy.user_id",
+                  input: findReqMaker.following.users,
+                },
+              },
+              null,
+            ],
+          },
+          myEngagement: {
+            $ifNull: [
+              {
+                $getField: {
+                  field: "$postedBy.user_id",
+                  input: findReqMaker.engagements,
+                },
+              },
+              { interactionCount: 0, lastInteraction: null },
+            ],
           },
         },
       },
-    },
 
-    {
-      $addFields: {
-        engagementsRankingScore: {
-          $add: [
-            {
-              $divide: [
+      {
+        $addFields: {
+          authorEngagement: {
+            $ifNull: [
+              `$postedBy.engagements.${user_id}`,
+              { interactionCount: 0, lastInteraction: null },
+            ],
+          },
+        },
+      },
+
+      {
+        $addFields: {
+          authorEngagementWeight: {
+            $switch: {
+              branches: [
                 {
-                  $multiply: [
-                    "$authorEngagement.interactionCount",
-                    "$authorEngagementWeight",
-                  ],
-                },
-                { $multiply: [{ $rand: {} }, 10] },
-              ],
-            },
-            {
-              $divide: [
-                {
-                  $multiply: [
-                    "$myEngagement.interactionCount",
-                    "$myEngagementWeight",
-                  ],
-                },
-                { $multiply: [{ $rand: {} }, 10] },
-              ],
-            },
-            {
-              $divide: [
-                "$engagementScore",
-                {
-                  $cond: {
-                    if: { $eq: ["$postedBy.postsCount", 0] },
-                    then: 1,
-                    else: "$postedBy.postsCount",
+                  case: {
+                    $gte: [
+                      "$authorEngagement.lastInteraction",
+                      new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                    ],
                   },
+                  then: 0.3,
+                },
+                {
+                  case: {
+                    $gte: [
+                      "$authorEngagement.lastInteraction",
+                      new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.15,
+                },
+                {
+                  case: {
+                    $gte: [
+                      "$authorEngagement.lastInteraction",
+                      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.08,
                 },
               ],
+              default: 0,
             },
-          ],
-        },
-      },
-    },
-
-    {
-      $addFields: {
-        timeFactor: {
-          $switch: {
-            branches: [
-              {
-                case: {
-                  $gte: [
-                    "$createdAt",
-                    new Date(Date.now() - 24 * 60 * 60 * 1000),
-                  ],
+          },
+          myEngagementWeight: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $gte: [
+                      "$myEngagement.lastInteraction",
+                      new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.5,
                 },
-                then: 5,
-              },
-              {
-                case: {
-                  $gte: [
-                    "$createdAt",
-                    new Date(Date.now() - 35 * 60 * 60 * 1000),
-                  ],
+                {
+                  case: {
+                    $gte: [
+                      "$myEngagement.lastInteraction",
+                      new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.2,
                 },
-                then: 1.2,
-              },
-              {
-                case: {
-                  $gte: [
-                    "$createdAt",
-                    new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-                  ],
+                {
+                  case: {
+                    $gte: [
+                      "$myEngagement.lastInteraction",
+                      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.1,
                 },
-                then: 0.5,
-              },
-              {
-                case: {
-                  $gte: [
-                    "$createdAt",
-                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                  ],
-                },
-                then: 0.2,
-              },
-            ],
-            default: 0.1,
+              ],
+              default: 0,
+            },
           },
         },
-        followFactor: {
-          $cond: { if: "$isFollowingAuthor", then: 1.6, else: 0.5 },
-        },
-        followedByFactor: {
-          $cond: { if: "$isFollowedByAuthor", then: 1.1, else: 1 },
-        },
-        randomValueFactor: {
-          $multiply: [{ $rand: {} }, 99],
-        },
       },
-    },
-    {
-      $addFields: {
-        rankingScore: {
-          $multiply: [
-            { $add: ["$engagementsRankingScore", 1] },
-            {
-              $multiply: [
-                "$timeFactor",
-                "$followFactor",
-                "$followedByFactor",
-                "$randomValueFactor",
-              ],
-            },
-          ],
-        },
-      },
-    },
 
-    { $sort: { rankingScore: -1, createdAt: -1 } },
-
-    { $limit: 15 },
-  ];
-
-  let defaultQuery = [
-    { $match: { post_id: { $nin: loadedPosts } } },
-
-    // { $sort: { createdAt: -1, engagementScore: -1 } },
-    {
-      $lookup: {
-        from: "users",
-        foreignField: "user_id",
-        localField: "user_id",
-        as: "postedBy",
-      },
-    },
-    {
-      $match: {
-        postedBy: {
-          $ne: [],
-        },
-      },
-    },
-    {
-      $set: {
-        postedBy: {
-          $arrayElemAt: ["$postedBy", 0],
-        },
-      },
-    },
-
-    //interactions
-  ];
-
-  const projectionSatge = [
-    {
-      $project: {
-        "postedBy.password": 0,
-        "postedBy.folder": 0,
-        "postedBy.cover": 0,
-        "postedBy.pfp": 0,
-        "postedBy.generalInfo": 0,
-        "postedBy.meowments": 0,
-        "postedBy._id": 0,
-        "postedBy.postsCount": 0,
-        "postedBy.followers": 0,
-        "postedBy.following": 0,
-        "postedBy.user_id": 0,
-        "postedBy.engagements": 0,
-        "isRemeow.originalPost.isRemeow": 0,
-        "isRemeow.originalPost.__v": 0,
-        "isRemeow.originalPost._id": 0,
-        "isRemeow.originalPost.user_id": 0,
-        "isRemeow.originalPost.postedBy.password": 0,
-        "isRemeow.originalPost.postedBy.folder": 0,
-        "isRemeow.originalPost.postedBy._id": 0,
-        "isRemeow.originalPost.postedBy.pfp": 0,
-        "isRemeow.originalPost.postedBy.cover": 0,
-        "isRemeow.originalPost.postedBy.meowments": 0,
-        "isRemeow.originalPost.postedBy.generalInfo": 0,
-        "isRemeow.originalPost.postedBy.followers": 0,
-        "isRemeow.originalPost.postedBy.postsCount": 0,
-        "isRemeow.originalPost.postedBy.engagements": 0,
-        "isRemeow.originalPost.interactions": 0,
-        "isRemeow.originalPost.postedBy.following": 0,
-        "isRemeow.originalPost.engagementScore": 0,
-        tempInteractions: 0,
-        "isRemeow.id": 0,
-        user_id: 0,
-        _id: 0,
-        isRemeowData: 0,
-        originalPoster: 0,
-        // engagementScore: 0,
-        __v: 0,
-      },
-    },
-  ];
-
-  const reformingStage = [
-    {
-      $addFields: {
-        "interactions.likes": {
-          $mergeObjects: [
-            { count: "$interactions.likes.count" },
-            {
-              isInteracted: {
-                $ne: [
-                  { $ifNull: [`$interactions.likes.users.${user_id}`, null] },
-                  null,
-                ],
-              },
-            },
-          ],
-        },
-        "interactions.saves": {
-          $mergeObjects: [
-            { count: "$interactions.saves.count" },
-            {
-              isInteracted: {
-                $ne: [
-                  { $ifNull: [`$interactions.saves.users.${user_id}`, null] },
-                  null,
-                ],
-              },
-            },
-          ],
-        },
-        "interactions.remeows": {
-          $mergeObjects: [
-            { count: "$interactions.remeows.count" },
-            {
-              isInteracted: {
-                $ne: [
+      {
+        $addFields: {
+          engagementsRankingScore: {
+            $add: [
+              {
+                $divide: [
                   {
-                    $ifNull: [`$interactions.remeows.users.${user_id}`, null],
+                    $multiply: [
+                      "$authorEngagement.interactionCount",
+                      "$authorEngagementWeight",
+                    ],
                   },
-                  null,
+                  { $multiply: [{ $rand: {} }, 10] },
                 ],
               },
-            },
-          ],
-        },
-      },
-    },
-    //remeows
-    {
-      $addFields: {
-        isRemeow: {
-          $cond: {
-            if: { $ne: ["$isRemeow", null] }, // Check if isRemeow is not null
-            then: {
-              id: "$isRemeow",
-              status: true,
-            },
-            else: { status: false },
+              {
+                $divide: [
+                  {
+                    $multiply: [
+                      "$myEngagement.interactionCount",
+                      "$myEngagementWeight",
+                    ],
+                  },
+                  { $multiply: [{ $rand: {} }, 10] },
+                ],
+              },
+              {
+                $divide: [
+                  "$engagementScore",
+                  {
+                    $cond: {
+                      if: { $eq: ["$postedBy.postsCount", 0] },
+                      then: 1,
+                      else: "$postedBy.postsCount",
+                    },
+                  },
+                ],
+              },
+            ],
           },
         },
       },
-    },
-    {
-      $lookup: {
-        from: "posts",
-        localField: "isRemeow.id", // The ID of the reposted post
-        foreignField: "post_id",
-        as: "isRemeowData",
-      },
-    },
-    {
-      $set: {
-        isRemeowData: { $arrayElemAt: ["$isRemeowData", 0] },
-      },
-    },
-    {
-      $lookup: {
-        from: "users",
-        foreignField: "user_id",
-        localField: "isRemeowData.user_id",
-        as: "originalPoster",
-      },
-    },
-    {
-      $addFields: {
-        originalPoster: { $arrayElemAt: ["$originalPoster", 0] },
-      },
-    },
-    {
-      $addFields: {
-        "isRemeow.originalPost": "$isRemeowData",
-      },
-    },
-    {
-      $addFields: {
-        "isRemeow.originalPost.postedBy": "$originalPoster",
-      },
-    },
-    {
-      $match: {
-        $nor: [
-          { "isRemeow.status": true, "isRemeow.originalPost": { $eq: {} } },
-        ],
-      },
-    },
-  ];
 
-  if (user && !filter) {
-    if (!findUserId) throwError("User was not found", 400);
-    defaultQuery = [
-      { $match: { user_id: findUserId.user_id } },
-      { $sort: { createdAt: -1 } },
-      ...defaultQuery,
-      ...reformingStage,
-      ...projectionSatge,
+      {
+        $addFields: {
+          timeFactor: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $gte: [
+                      "$createdAt",
+                      new Date(Date.now() - 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 5,
+                },
+                {
+                  case: {
+                    $gte: [
+                      "$createdAt",
+                      new Date(Date.now() - 35 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 1.2,
+                },
+                {
+                  case: {
+                    $gte: [
+                      "$createdAt",
+                      new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.5,
+                },
+                {
+                  case: {
+                    $gte: [
+                      "$createdAt",
+                      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                    ],
+                  },
+                  then: 0.2,
+                },
+              ],
+              default: 0.1,
+            },
+          },
+          followFactor: {
+            $cond: { if: "$isFollowingAuthor", then: 1.6, else: 0.5 },
+          },
+          followedByFactor: {
+            $cond: { if: "$isFollowedByAuthor", then: 1.1, else: 1 },
+          },
+          randomValueFactor: {
+            $multiply: [{ $rand: {} }, 99],
+          },
+        },
+      },
+      {
+        $addFields: {
+          rankingScore: {
+            $multiply: [
+              { $add: ["$engagementsRankingScore", 1] },
+              {
+                $multiply: [
+                  "$timeFactor",
+                  "$followFactor",
+                  "$followedByFactor",
+                  "$randomValueFactor",
+                ],
+              },
+            ],
+          },
+        },
+      },
+
+      { $sort: { rankingScore: -1, createdAt: -1 } },
+
+      { $limit: 15 },
     ];
-  } else if (filter && user_id === findUserId.user_id) {
-    defaultQuery = [
+
+    let defaultQuery = [
+      { $match: { post_id: { $nin: loadedPosts } } },
+
+      // { $sort: { createdAt: -1, engagementScore: -1 } },
+      {
+        $lookup: {
+          from: "users",
+          foreignField: "user_id",
+          localField: "user_id",
+          as: "postedBy",
+        },
+      },
       {
         $match: {
-          [`interactions.saves.users.${user_id}`]: { $exists: true },
+          postedBy: {
+            $ne: [],
+          },
         },
       },
-      { $sort: { createdAt: -1 } },
+      {
+        $set: {
+          postedBy: {
+            $arrayElemAt: ["$postedBy", 0],
+          },
+        },
+      },
 
-      ...defaultQuery,
-      ...reformingStage,
-      ...projectionSatge,
+      //interactions
     ];
-  } else {
-    defaultQuery = [
-      ...defaultQuery,
-      ...algoStage,
-      ...reformingStage,
-      ...projectionSatge,
+
+    const projectionSatge = [
+      {
+        $project: {
+          "postedBy.password": 0,
+          "postedBy.folder": 0,
+          "postedBy.cover": 0,
+          "postedBy.pfp": 0,
+          "postedBy.generalInfo": 0,
+          "postedBy.meowments": 0,
+          "postedBy._id": 0,
+          "postedBy.postsCount": 0,
+          "postedBy.followers": 0,
+          "postedBy.following": 0,
+          "postedBy.user_id": 0,
+          "postedBy.engagements": 0,
+          "isRemeow.originalPost.isRemeow": 0,
+          "isRemeow.originalPost.__v": 0,
+          "isRemeow.originalPost._id": 0,
+          "isRemeow.originalPost.user_id": 0,
+          "isRemeow.originalPost.postedBy.password": 0,
+          "isRemeow.originalPost.postedBy.folder": 0,
+          "isRemeow.originalPost.postedBy._id": 0,
+          "isRemeow.originalPost.postedBy.pfp": 0,
+          "isRemeow.originalPost.postedBy.cover": 0,
+          "isRemeow.originalPost.postedBy.meowments": 0,
+          "isRemeow.originalPost.postedBy.generalInfo": 0,
+          "isRemeow.originalPost.postedBy.followers": 0,
+          "isRemeow.originalPost.postedBy.postsCount": 0,
+          "isRemeow.originalPost.postedBy.engagements": 0,
+          "isRemeow.originalPost.interactions": 0,
+          "isRemeow.originalPost.postedBy.following": 0,
+          "isRemeow.originalPost.engagementScore": 0,
+          tempInteractions: 0,
+          "isRemeow.id": 0,
+          user_id: 0,
+          _id: 0,
+          isRemeowData: 0,
+          originalPoster: 0,
+          // engagementScore: 0,
+          __v: 0,
+        },
+      },
     ];
+
+    const reformingStage = [
+      {
+        $addFields: {
+          "interactions.likes": {
+            $mergeObjects: [
+              { count: "$interactions.likes.count" },
+              {
+                isInteracted: {
+                  $ne: [
+                    { $ifNull: [`$interactions.likes.users.${user_id}`, null] },
+                    null,
+                  ],
+                },
+              },
+            ],
+          },
+          "interactions.saves": {
+            $mergeObjects: [
+              { count: "$interactions.saves.count" },
+              {
+                isInteracted: {
+                  $ne: [
+                    { $ifNull: [`$interactions.saves.users.${user_id}`, null] },
+                    null,
+                  ],
+                },
+              },
+            ],
+          },
+          "interactions.remeows": {
+            $mergeObjects: [
+              { count: "$interactions.remeows.count" },
+              {
+                isInteracted: {
+                  $ne: [
+                    {
+                      $ifNull: [`$interactions.remeows.users.${user_id}`, null],
+                    },
+                    null,
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+      //remeows
+      {
+        $addFields: {
+          isRemeow: {
+            $cond: {
+              if: { $ne: ["$isRemeow", null] }, // Check if isRemeow is not null
+              then: {
+                id: "$isRemeow",
+                status: true,
+              },
+              else: { status: false },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "isRemeow.id", // The ID of the reposted post
+          foreignField: "post_id",
+          as: "isRemeowData",
+        },
+      },
+      {
+        $set: {
+          isRemeowData: { $arrayElemAt: ["$isRemeowData", 0] },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          foreignField: "user_id",
+          localField: "isRemeowData.user_id",
+          as: "originalPoster",
+        },
+      },
+      {
+        $addFields: {
+          originalPoster: { $arrayElemAt: ["$originalPoster", 0] },
+        },
+      },
+      {
+        $addFields: {
+          "isRemeow.originalPost": "$isRemeowData",
+        },
+      },
+      {
+        $addFields: {
+          "isRemeow.originalPost.postedBy": "$originalPoster",
+        },
+      },
+      {
+        $match: {
+          $nor: [
+            { "isRemeow.status": true, "isRemeow.originalPost": { $eq: {} } },
+          ],
+        },
+      },
+    ];
+
+    if (user && !filter) {
+      if (!findUserId) throwError("User was not found", 400);
+      defaultQuery = [
+        { $match: { user_id: findUserId.user_id } },
+        { $sort: { createdAt: -1 } },
+        ...defaultQuery,
+        ...reformingStage,
+        ...projectionSatge,
+      ];
+    } else if (filter && user_id === findUserId.user_id) {
+      defaultQuery = [
+        {
+          $match: {
+            [`interactions.saves.users.${user_id}`]: { $exists: true },
+          },
+        },
+        { $sort: { createdAt: -1 } },
+
+        ...defaultQuery,
+        ...reformingStage,
+        ...projectionSatge,
+      ];
+    } else {
+      defaultQuery = [
+        ...defaultQuery,
+        ...algoStage,
+        ...reformingStage,
+        ...projectionSatge,
+      ];
+    }
+
+    const result = await Posts.aggregate(defaultQuery, {
+      allowDiskUse: true,
+    });
+
+    return res.json(result);
+  } catch (err) {
+    next(err);
   }
-
-  const result = await Posts.aggregate(defaultQuery, {
-    allowDiskUse: true,
-  });
-
-  return res.json(result);
 };
-const LoadPost = async (req, res) => {
+const LoadPost = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { id } = req.params;
@@ -1661,13 +1660,11 @@ const LoadPost = async (req, res) => {
 
     return res.json(post[0]);
   } catch (err) {
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 };
 
-const LoadVirals = async (req, res) => {
+const LoadVirals = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const oneMonthAgo = new Date();
@@ -1721,8 +1718,8 @@ const LoadVirals = async (req, res) => {
     ]);
 
     res.json(findVirals);
-  } catch (error) {
-    res.status(500).json({ error: "An error occurred." });
+  } catch (err) {
+    next(err);
   }
 };
 async function handleInteraction(req, res, interactionType) {
@@ -1866,7 +1863,7 @@ async function broadcasrInteractions(id, interactionType) {
   });
 }
 
-const searchPosts = async (req, res) => {
+const searchPosts = async (req, res, next) => {
   try {
     const user_id = req.session.user_id || "2";
     const alreadyLoaded = req.body.alreadyLoaded || [];
@@ -1977,8 +1974,8 @@ const searchPosts = async (req, res) => {
     ]);
 
     return res.json(posts);
-  } catch (error) {
-    handleError(res, error);
+  } catch (err) {
+    next(err);
   }
 };
 

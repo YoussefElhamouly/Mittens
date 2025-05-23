@@ -6,9 +6,9 @@ import mongoose from "mongoose";
 import Pawprints from "../db/pawprintsSchema.js";
 import { throwError } from "../utils/helperFunctions.js";
 import imageType from "image-type";
-import fs from "fs/promises";
+
 import Conversation from "../db/conversationSchema.js";
-import { handleError } from "../utils/helperFunctions.js";
+
 import Users from "../db/usersSchema.js";
 import Notifications from "../db/notificationSchema.js";
 import path from "path";
@@ -16,9 +16,10 @@ import { __uploads, __temp } from "../config.js";
 import { handleAttachments } from "../utils/processFIles.js";
 import { hash, compare } from "bcrypt";
 import { body, validationResult } from "express-validator";
-const UpdateProfilePicture = async (req, res) => {
-  const user_id = req.session.user_id;
+
+const UpdateProfilePicture = async (req, res, next) => {
   try {
+    const user_id = req.session.user_id;
     if (!req.file) throwError("No file was uploaded", 400, null);
     const findUser = await Users.findOne({ user_id });
     if (!findUser) throwError("User was not found", 400, null);
@@ -52,18 +53,15 @@ const UpdateProfilePicture = async (req, res) => {
       await unlink(path.join(__uploads, "profiles", folder, pfp));
     }
 
-    res.status(200).send("Profile picture updated successfully");
+    res.status(201).send("Profile picture updated successfully");
   } catch (err) {
-    console.error(err);
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 };
 
-const UpdateCoverPhoto = async (req, res) => {
-  const user_id = req.session.user_id;
+const UpdateCoverPhoto = async (req, res, next) => {
   try {
+    const user_id = req.session.user_id;
     if (!req.file) throwError("No file was uploaded", 400, null);
     const findUser = await Users.findOne({ user_id });
     if (!findUser) throwError("User was not found", 400, null);
@@ -99,14 +97,11 @@ const UpdateCoverPhoto = async (req, res) => {
 
     res.status(200).send("Profile picture updated successfully");
   } catch (err) {
-    console.error(err);
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 };
 
-const LoadUser = async (req, res) => {
+const LoadUser = async (req, res, next) => {
   const userId = req.session.user_id;
   const userData = await Users.findOne(
     { user_id: userId },
@@ -147,13 +142,11 @@ const LoadUser = async (req, res) => {
 
     return res.json(result);
   } catch (err) {
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 };
 
-const LoadUsers = async (req, res) => {
+const LoadUsers = async (req, res, next) => {
   try {
     const { fetchedUsers } = req.body;
     const limit = req.query.limit || 3;
@@ -176,13 +169,11 @@ const LoadUsers = async (req, res) => {
 
     return res.json(findUsers);
   } catch (err) {
-    return res
-      .status(err.status || 500)
-      .send(err.message || "Unknown error occurred");
+    next(err);
   }
 };
 
-const FollowUser = async (req, res) => {
+const FollowUser = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { userTag } = req.params;
@@ -247,11 +238,11 @@ const FollowUser = async (req, res) => {
 
     return res.status(200).send(`User "${userTag}" was followed successfully`);
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UnFollowUser = async (req, res) => {
+const UnFollowUser = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { userTag } = req.params;
@@ -291,11 +282,11 @@ const UnFollowUser = async (req, res) => {
       .status(200)
       .send(`User "${userTag}" was unfollowed successfully`);
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const LoadFollowingList = async (req, res) => {
+const LoadFollowingList = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { userTag } = req.params;
@@ -330,11 +321,11 @@ const LoadFollowingList = async (req, res) => {
 
     return res.json(followedUsers);
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const LoadFollowersList = async (req, res) => {
+const LoadFollowersList = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { userTag } = req.params;
@@ -377,11 +368,11 @@ const LoadFollowersList = async (req, res) => {
 
     return res.json(followedUsers);
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const LoadNotifications = async (req, res) => {
+const LoadNotifications = async (req, res, next) => {
   try {
     const loadedNotifications = req.body.loadedNotifications || [];
     const user_id = req.session.user_id;
@@ -438,12 +429,11 @@ const LoadNotifications = async (req, res) => {
 
     return res.status(200).json(notifications);
   } catch (err) {
-    console.log(err);
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UpdateNotificationSettings = async (req, res) => {
+const UpdateNotificationSettings = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { type } = req.params;
@@ -478,11 +468,11 @@ const UpdateNotificationSettings = async (req, res) => {
       type: type,
     });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UpdateMeowMents = async (req, res) => {
+const UpdateMeowMents = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     const { meowments } = req.body;
@@ -544,11 +534,11 @@ const UpdateMeowMents = async (req, res) => {
       return res.json({ meowments: modified, success: true });
     }
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UpdatePassword = async (req, res) => {
+const UpdatePassword = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     await Promise.all([
@@ -584,11 +574,11 @@ const UpdatePassword = async (req, res) => {
 
     return res.json({ status: "password updated" });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UpdateGeneralInfo = async (req, res) => {
+const UpdateGeneralInfo = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     await Promise.all([
@@ -675,11 +665,11 @@ const UpdateGeneralInfo = async (req, res) => {
 
     return res.json({ status: "general info updated" });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 
-const UpdateBio = async (req, res) => {
+const UpdateBio = async (req, res, next) => {
   try {
     const user_id = req.session.user_id;
     await body("bio")
@@ -712,7 +702,7 @@ const UpdateBio = async (req, res) => {
 
     return res.json({ status: "bio updated" });
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 };
 export {

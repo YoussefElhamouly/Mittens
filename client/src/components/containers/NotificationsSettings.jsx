@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import NotificationsToggler from './NotificationsToggler';
-import { LoginContext } from '../contexts/LoginContext';
+import { useSelector } from 'react-redux';
 const NotificationsSettings = ({ isShown, onClose }) => {
-  const { notificationSettings } = useContext(LoginContext);
+  const notificationSettings = useSelector((state) => state.userData.userData.notificationSettings);
 
   return (
     <>

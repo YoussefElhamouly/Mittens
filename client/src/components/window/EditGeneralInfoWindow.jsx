@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import countries from '../Auth/countries.json';
-import { LoginContext } from '../contexts/LoginContext';
+
 import { ProfileDataContext } from '../contexts/ProfileDataContext';
 import { handleRequest } from '../../utils/helperFunctions';
 

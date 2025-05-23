@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState, useContext } from 'react';
 import Swiper from 'swiper/bundle';
 import { ProfileDataContext } from '../contexts/ProfileDataContext.jsx';
-import { LoginContext } from '../contexts/LoginContext.jsx';
+
 import EditMeowMentImage from './EditMeowMentImage.jsx';
 import { handleRequest } from '../../utils/helperFunctions.js';
-
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../Redux/Slices/userDataSlice.js';
+import { SocketContext } from '../contexts/SocketContext.jsx';
 const EditMeowMentsSlider = ({ onClose }) => {
   const swiperContainerRef = useRef(null);
   const swiperPaginationRef = useRef(null);
@@ -12,7 +14,8 @@ const EditMeowMentsSlider = ({ onClose }) => {
   const swiperPrevRef = useRef(null);
   const actualSwiperRef = useRef();
   const { fetchedUserData, setFetchedUserData } = useContext(ProfileDataContext);
-  const { userData, domain } = useContext(LoginContext);
+  const userData = useSelector(getUserData);
+  const { domain } = useContext(SocketContext);
   const [images, setImages] = useState(fetchedUserData?.meowments?.map((img) => `${domain}/LoadMeowment/${fetchedUserData.userTag}/${img.fileName}`) || []);
   const [newImages, setNewImages] = useState([]);
   const [errorsWindow, setErrorsWindow] = useState(null);

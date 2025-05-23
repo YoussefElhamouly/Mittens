@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { useContext } from 'react';
-import { LoginContext } from './contexts/LoginContext';
+import { SocketContext } from './contexts/SocketContext';
 import { Link } from 'react-router-dom';
 import { throwError } from '../utils/helperFunctions';
 
 const User = ({ firstName, lastName, userTag, isFollowed }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   const [followed, setFollowed] = useState(isFollowed);
   const [isLoading, setIsLoading] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);

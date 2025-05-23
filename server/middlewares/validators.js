@@ -1,5 +1,5 @@
 import { body, param, validationResult } from "express-validator";
-import { handleError, throwError } from "../utils/helperFunctions.js";
+import { throwError } from "../utils/helperFunctions.js";
 import Users from "../db/usersSchema.js";
 const validatePost = async (req, res, next) => {
   try {
@@ -97,10 +97,7 @@ const validatePost = async (req, res, next) => {
 
     next();
   } catch (err) {
-    return res.status(err.status || 500).json({
-      message: err.message || "Unknown error occurred",
-      details: err.details || [],
-    });
+    next(err);
   }
 };
 
@@ -125,10 +122,7 @@ const validateRemeow = async (req, res, next) => {
       throwError("Post validation failed", 400, errors.array());
     next();
   } catch (err) {
-    return res.status(err.status || 500).json({
-      message: err.message || "Unknown error occurred",
-      details: err.details || [],
-    });
+    next(err);
   }
 };
 const validateRegFormData = async (req, res, next) => {
@@ -228,7 +222,7 @@ const validateRegFormData = async (req, res, next) => {
 
     next();
   } catch (error) {
-    handleError(res, error);
+    next(err);
   }
 };
 

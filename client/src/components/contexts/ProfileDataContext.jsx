@@ -1,14 +1,14 @@
 import React, { createContext, useState, useEffect, useRef, useContext } from 'react';
 import { handleRequest } from '../../utils/helperFunctions';
 import { useParams } from 'react-router-dom';
-import { LoginContext } from './LoginContext';
+import { SocketContext } from './SocketContext';
 const ProfileDataContext = createContext();
 
 const ProfileDataContextProvider = ({ children }) => {
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   const [fetchedUserData, setFetchedUserData] = useState();
   const [isFetching, setIsFetching] = useState(true);
-  const [filter, setFilter] = useState(JSON.parse(localStorage.getItem('profile'))?.filter || null);
+  const [filter, setFilter] = useState(JSON.parse(localStorage.getItem('profile'))?.filter || ' ');
   const fetchingControllerRef = useRef(new AbortController());
   const fetchingIntervalRef = useRef(null);
   const [errorsWindow, setErrorsWindow] = useState(null);

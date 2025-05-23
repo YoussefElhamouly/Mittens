@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { handleRequest } from '../../utils/helperFunctions';
 import MessageWindow from './MessageWindow';
-import { useContext } from 'react';
-import { LoginContext } from '../contexts/LoginContext';
+import { useDispatch } from 'react-redux';
+import { setIsLoggedIn, setUserData } from '../../Redux/Slices/userDataSlice';
 const LogoutWindow = ({ onClose }) => {
-  const { setUserData, setIsLoggedIn } = useContext(LoginContext);
+  const dispatch = useDispatch();
   const windowRef = useRef();
   const [isLoading, setIsloading] = useState(false);
   const [errors, setErrors] = useState(null);
@@ -20,8 +20,8 @@ const LogoutWindow = ({ onClose }) => {
       intervalRef,
       setIsloading,
       (data) => {
-        setIsLoggedIn(false);
-        setUserData(null);
+        dispatch(setIsLoggedIn(false));
+        dispatch(setUserData(null));
       },
       (err) => {
         setErrors(errors);

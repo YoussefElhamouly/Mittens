@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useContext } from 'react';
-import { LoginContext } from '../contexts/LoginContext';
+
 import { ActiveChatContext } from '../contexts/ActiveChatContext';
 import ChatLink from './ChatLink';
 import { handleRequest, stopRefetching } from '../../utils/helperFunctions';
 import ChatLinkSkeleton from '../skeletons/ChatLinkSkeleton.jsx';
 const SidePanel = () => {
-  const { domain, userData } = useContext(LoginContext);
   const { chatLinks, setChatLinks, filter, setFilter } = useContext(ActiveChatContext);
 
   const fetchIntervalRef = useRef();

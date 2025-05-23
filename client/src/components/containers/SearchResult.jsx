@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
 const SearchResult = ({ type, postedBy, post_id, postText }) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
-  const { domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
   return (
     <Link className="search-result" to={type === 'post' ? `/posts/${post_id}` : `/profile/${postedBy.userTag}`} style={{ textDecoration: 'none' }}>
       <div className="search-result-header">

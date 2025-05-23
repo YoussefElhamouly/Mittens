@@ -1,9 +1,11 @@
 import React, { useContext } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { LoginContext } from './LoginContext.jsx';
+import { SocketContext } from './SocketContext.jsx';
+import { useSelector } from 'react-redux';
 
 const ProtectedRoutes = () => {
-  const { isLoggedIn, isLoading, socketReady } = useContext(LoginContext);
+  const { isLoggedIn, isLoading } = useSelector((state) => state.userData);
+  const { isSocketReady } = useContext(SocketContext);
   const location = useLocation();
 
   if (isLoading) {
@@ -18,7 +20,7 @@ const ProtectedRoutes = () => {
     return <Navigate to="/" />;
   }
 
-  if (socketReady && !isLoading) return <Outlet />;
+  if (isSocketReady && !isLoading) return <Outlet />;
 };
 
 export default ProtectedRoutes;

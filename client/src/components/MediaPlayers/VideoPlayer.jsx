@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Plyr from 'plyr';
-
+import 'plyr/dist/plyr.css';
 const VideoPlayer = ({ src, maxHeight }) => {
   const videoRef = useRef();
   const plyrRef = useRef();

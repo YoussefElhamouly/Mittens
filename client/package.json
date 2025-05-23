@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^4.1.0",
     "@react-google-maps/api": "^2.20.3",
+    "@reduxjs/toolkit": "^2.7.0",
     "@videojs/themes": "^1.0.1",
     "animate.css": "^4.1.1",
     "cropperjs": "^1.6.2",
@@ -23,7 +24,8 @@
     "react-hook-form": "^7.54.2",
     "react-leaflet": "^4.2.1",
     "react-player": "^2.16.0",
-    "react-router-dom": "^6.25.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.5.2",
     "socket.io-client": "^4.8.0",
     "swiper": "^11.1.15",
     "video.js": "^8.21.0",

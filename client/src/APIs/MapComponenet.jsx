@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { GoogleMap, useLoadScript, StandaloneSearchBox } from '@react-google-maps/api';
+const GEO_API_KEY = import.meta.env.VITE_GOOGLE_GEO_API_KEY;
 
 const libraries = ['places'];
 
@@ -129,8 +130,8 @@ const MapComponent = ({ onLocationChange, postButton, windowContainer, displayed
   }, [displayed]);
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: 'AIzaSyB3uOPebdXTyyVecG-tBlNDXsEbMLd3XIc', // Replace with your API key
-    // googleMapsApiKey: 'AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao',
+    googleMapsApiKey: GEO_API_KEY,
+
     libraries,
     language: 'en',
   });

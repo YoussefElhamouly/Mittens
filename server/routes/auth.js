@@ -2,14 +2,14 @@ import { Router } from "express";
 import { checkLogin } from "../middlewares/checkLogin.js";
 import { compare } from "bcrypt";
 import Users from "../db/usersSchema.js";
-import { handleError } from "../utils/helperFunctions.js";
+
 import Notifications from "../db/notificationSchema.js";
 import { validateRegFormData } from "../middlewares/validators.js";
 
 import { verifyCode, register, logout } from "../controllers/AuthController.js";
 const auth = Router();
 
-const dummyLogin = async (req, res) => {
+const dummyLogin = async (req, res, next) => {
   try {
     const { userTag, password } = req.body;
 
@@ -53,13 +53,13 @@ const dummyLogin = async (req, res) => {
     };
     return res.status(200).json(result);
   } catch (err) {
-    handleError(res, err);
+    next(res);
   }
 };
 
 auth.post("/login", dummyLogin);
 
-auth.post("/autologin", checkLogin, async (req, res) => {
+auth.post("/autologin", checkLogin, async (req, res, next) => {
   try {
     if (!req.session.user_id) return res.status(400).send("no");
     const findUser = await Users.findOne(
@@ -94,7 +94,7 @@ auth.post("/autologin", checkLogin, async (req, res) => {
     };
     return res.status(200).json(result);
   } catch (err) {
-    handleError(res, err);
+    next(err);
   }
 });
 

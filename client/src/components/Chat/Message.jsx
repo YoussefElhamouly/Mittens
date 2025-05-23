@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useContext } from 'react';
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
 import Slider from '../MediaPlayers/Slider';
 import VideoPlayer from '../MediaPlayers/VideoPlayer';
 import { timeDifference } from '../../utils/helperFunctions';
 import Image from '../MediaPlayers/Image';
-
+import { useSelector } from 'react-redux';
 const Message = React.memo(({ sender, recipient, messageBody, createdAt, _id, isSeen }) => {
   const [isPfpImageLoading, setIsPfpImageLoading] = useState(true);
 
@@ -22,7 +22,8 @@ const Message = React.memo(({ sender, recipient, messageBody, createdAt, _id, is
       )
     );
   };
-  const { userData, domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector((state) => state.userData.userData);
 
   return (
     <div className={sender.userTag === userData.userTag ? 'chat-message sent-msg' : 'chat-message'}>

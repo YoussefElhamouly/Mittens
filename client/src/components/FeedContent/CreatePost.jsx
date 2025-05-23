@@ -4,11 +4,15 @@ import VideoPreview from '../Previews/VideoPreview.jsx';
 import EventWindow from '../window/EventWindow.jsx';
 import PollsWindow from '../window/PollsWindow';
 import MessageWindow from '../window/MessageWindow.jsx';
-import { LoginContext } from '../contexts/LoginContext.jsx';
+
 import useUploadFiles from '../hooks/UseUploadFiles.jsx';
 import { handleRequest } from '../../utils/helperFunctions.js';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../Redux/Slices/userDataSlice.js';
+import { SocketContext } from '../contexts/SocketContext.jsx';
 const CreatePost = ({ setPosts }) => {
-  const { userData, domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
   const { previewImage, previewVideo, imagePreview, videoPreview, videoInputRef, imageInputRef, videoUploadStroke, imageUploadStroke, attachmentsRef, fileCounter, xhrRef, loadStatus, abortVideo, discardFile, discardVideo, abort, errorsWindow, setImagePreview, setLoadStatus, setVideoPreview, setErrorsWindow } = useUploadFiles('/api/posts/uploadAttachments');
 
   const [postCaption, setPostCaption] = useState(null);

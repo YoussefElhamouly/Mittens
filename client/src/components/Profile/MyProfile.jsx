@@ -1,9 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LoginContext } from '../contexts/LoginContext';
+import { SocketContext } from '../contexts/SocketContext';
+
 import { formatNumber } from '../../utils/helperFunctions';
+import { useSelector } from 'react-redux';
+
+import { getUserData } from '../../Redux/Slices/userDataSlice';
 const MyProfile = () => {
-  const { userData, domain } = useContext(LoginContext);
+  const { domain } = useContext(SocketContext);
+  const userData = useSelector(getUserData);
   const [isImageLoading, setIsImageLoading] = useState([true, true]);
 
   function handleImageLoad(i) {

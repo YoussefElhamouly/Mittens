@@ -4,14 +4,18 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useNavigate } from 'react-router-dom';
-import { LoginContext } from '../components/contexts/LoginContext.jsx';
 
 import LoadingScreen from '../components/Auth/LoadingScreen';
 import Bg from '../components/Auth/Bg';
 import { handleRequest } from '../utils/helperFunctions.js';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { setUserData, setIsLoggedIn, getIsLoading, getIsLoggedIn } from '../redux/Slices/userDataSlice';
+import {} from '../redux/Slices/userDataSlice';
 const Login = () => {
-  const { setUserData, setIsLoggedIn, isLoading, isLoggedIn } = useContext(LoginContext);
+  const dispatch = useDispatch();
+  const isLoading = useSelector(getIsLoading);
+  const isLoggedIn = useSelector(getIsLoggedIn);
+
   const nav = useNavigate();
   const fetchIntervalRef = useRef(null);
 
@@ -25,8 +29,8 @@ const Login = () => {
       fetchIntervalRef,
       setLoadState,
       (data) => {
-        setIsLoggedIn(true);
-        setUserData(data);
+        dispatch(setIsLoggedIn(true));
+        dispatch(setUserData(data));
       },
       null
     );

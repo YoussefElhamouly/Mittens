@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import Post from './Post';
 import CreatePost from './CreatePost';
 import Skeleton from '../skeletons/Skeleton';
-import { LoginContext } from '../contexts/LoginContext';
-import { handleRequest, throwError } from '../../utils/helperFunctions';
+import { handleRequest } from '../../utils/helperFunctions';
 import { ProfileDataContext } from '../contexts/ProfileDataContext';
 import MessageWindow from '../window/MessageWindow';
+import { useSelector } from 'react-redux';
+import { getUserData } from '../../Redux/Slices/userDataSlice.js';
 const Feed = ({ children }) => {
-  const { userData } = useContext(LoginContext);
+  const userData = useSelector(getUserData);
   const { filter, tag } = useContext(ProfileDataContext) || {};
   const userTag = tag;
 
@@ -68,7 +69,7 @@ const Feed = ({ children }) => {
           setPosts((prev) => [...prev, ...data]);
         }
 
-        if (!data.length) {
+        if (!data.length || data.length < 15) {
           setNoMore(true);
         }
       },
