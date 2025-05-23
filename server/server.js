@@ -1,12 +1,12 @@
 import express from "express";
-import { initSocketIO } from "./socket.js"; // Import the function
+import { initSocketIO } from "./socket.js";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import posts from "./routes/posts.js";
 import auth from "./routes/auth.js";
 import users from "./routes/users.js";
 import { __uploads } from "./config.js";
-import { createServer } from "http"; // Import http module to create server
+import { createServer } from "http";
 import comments from "./routes/comments.js";
 import chats from "./routes/chats.js";
 import MongoStore from "connect-mongo";
