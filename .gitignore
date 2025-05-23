@@ -16,3 +16,4 @@ server/temp/
 
 # Ignore this .gitignore file
 .gitignore
+test.txt
