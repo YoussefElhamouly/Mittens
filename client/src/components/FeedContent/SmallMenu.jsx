@@ -7,7 +7,7 @@ const SmallMenu = ({ dataToDisplay, shareUrl, onClose, menuBtnRef, menuRef, dele
   const [infoWindow, setInfoWindow] = useState(null); // Corrected state initialization
   const [areYouSureWindow, setAreYouSureWindow] = useState(false);
 
-  useOutsideClick(menuRef, menuBtnRef, onClose);
+  // useOutsideClick(menuRef, menuBtnRef, onClose);
 
   return (
     <>
