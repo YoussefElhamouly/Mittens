@@ -37,7 +37,9 @@ const Login = () => {
   }
   useEffect(() => {
     if (isLoggedIn) {
-      nav('/');
+      const redirectPath = localStorage.getItem('redirectPath') || '/';
+      localStorage.removeItem('redirectPath');
+      nav(redirectPath);
     }
   }, [isLoggedIn]);
   if (!isLoggedIn && !isLoading)
