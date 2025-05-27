@@ -6,11 +6,13 @@ import { throwError } from "../utils/helperFunctions.js";
 import { hash } from "bcrypt";
 import Users from "../models/usersSchema.js";
 import path from "path";
+
 import { __uploads, __dirname } from "../config.js";
 import { body, validationResult } from "express-validator";
 
 import fs from "fs/promises";
 import ejs from "ejs";
+import juice from "juice";
 
 const TRANSPORTER_EMAIL = process.env.TRANSPORTER_EMAIL || "";
 const TRANSPORTER_PASSWORD = process.env.TRANSPORTER_PASSWORD || "";
@@ -124,14 +126,20 @@ async function sendVerificationEmail(
   try {
     const html = await ejs.renderFile(
       path.join(__dirname, "/views/verificationEmail.ejs"),
-      { user, verificationCode }
+      { verificationCode }
     );
+    const css = await fs.readFile(
+      path.join(__dirname, "/views/index.css"),
+      "utf8"
+    );
+    const htmlWithCss = `<style>${css}</style>${html}`;
+    const inlinedHtml = juice(htmlWithCss);
     const mailOptions = {
       from: TRANSPORTER_EMAIL,
       to: userEmail,
       subject: "Email Verification Code",
       text: "",
-      html: html,
+      html: inlinedHtml,
     };
 
     await transporter.sendMail(mailOptions);
@@ -139,7 +147,6 @@ async function sendVerificationEmail(
     throwError(err?.message, err?.status);
   }
 }
-
 async function logout(req, res, next) {
   try {
     req.session.destroy();

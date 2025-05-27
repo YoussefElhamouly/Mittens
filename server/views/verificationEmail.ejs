@@ -4,88 +4,39 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
-  <body
-    style="
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-      font-family: inherit;
-      font-size: 16px;
-      background-color: #1b2730;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    "
-  >
-    <div
-      class="email-content"
-      style="
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background-color: #1b2730;
-      "
+  <body>
+    <table
+      class="email-container"
+      align="center"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
     >
-      <div
-        class="image-container"
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          width: 50px;
-          height: 50px;
-        "
-      >
-        <img
-          src="./assets/logo.png"
-          alt="Logo"
-          style="width: 100%; margin: 0; padding: 0; box-sizing: border-box"
-        />
-      </div>
-      <h1
-        style="
-          font-size: 1.7rem;
-          color: #95a3b1;
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: inherit;
-        "
-      >
-        Hello
-        <span style="font-size: 1.7rem; color: #348fc8"><%= user %></span>
-      </h1>
-      <p
-        style="
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: inherit;
-          font-size: 16px;
-          color: #95a3b1;
-        "
-      >
-        Thank you for signing up! To complete your registration, please verify
-        your email address.
-      </p>
-      <p
-        class="v-code"
-        style="
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: inherit;
-          font-size: 16px;
-          color: #95a3b1;
-        "
-      >
-        Your verification code is:
-        <strong style="color: #348fc8"><%= verificationCode %></strong>
-      </p>
-    </div>
+      <tr>
+        <td class="image-container" style="padding-bottom: 10px">
+          <img src="https://i.ibb.co/vxPJRGLD/logo.png" alt="Logo" />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h1>Hello <span>Cat</span></h1>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Thank you for signing up! To complete your registration, please
+            verify your email address.
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p class="v-code">
+            Your verification code is: <strong><%= verificationCode %></strong>
+          </p>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

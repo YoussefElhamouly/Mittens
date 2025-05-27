@@ -33,6 +33,7 @@
     "http": "^0.0.1-security",
     "image-type": "^5.2.0",
     "ioredis": "^5.6.0",
+    "juice": "^11.0.1",
     "mime-types": "^2.1.35",
     "mongoose": "^8.10.0",
     "multer": "^1.4.5-lts.1",
