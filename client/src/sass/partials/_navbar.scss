@@ -12,9 +12,7 @@
   background-color: var(--bg-color);
 
   .logo-img {
-    transform: rotate(-10deg);
-    width: 35px;
-    height: 45px;
+    height: 50px;
     background-size: contain;
     filter: invert(58%) sepia(15%) saturate(6423%) hue-rotate(176deg) brightness(86%) contrast(79%);
   }
