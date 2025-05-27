@@ -5,7 +5,7 @@ import ProtectedRoutes from './components/contexts/ProtectedRoutes';
 import { ActiveChatContextProvider } from './components/contexts/ActiveChatContext';
 import { ProfileDataContextProvider } from './components/contexts/ProfileDataContext';
 import { SocketContextProvider } from './components/contexts/SocketContext';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setIsLoading, setIsLoggedIn, setUserData } from './Redux/Slices/userDataSlice';
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -14,8 +14,7 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Chats = lazy(() => import('./pages/Chats'));
 const PostSearchBlock = lazy(() => import('./components/FeedContent/PostSearchBlock'));
 const NotFound = lazy(() => import('./pages/NotFound'));
-
-import './css/main.css';
+import './sass/main.scss';
 
 const router = createBrowserRouter([
   {
