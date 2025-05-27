@@ -1,7 +1,7 @@
-import { Posts } from "../db/postsSchema.js";
-import Interactions from "../db/InteractionsSchema.js";
-import { Comments } from "../db/commentsSchema.js";
-import Users from "../db/usersSchema.js";
+import { Posts } from "../models/postsSchema.js";
+import Interactions from "../models/InteractionsSchema.js";
+import { Comments } from "../models/commentsSchema.js";
+import Users from "../models/usersSchema.js";
 import { unlink } from "fs/promises";
 import { getIO } from "../socket.js";
 

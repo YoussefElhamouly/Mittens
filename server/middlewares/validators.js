@@ -1,6 +1,6 @@
 import { body, param, validationResult } from "express-validator";
 import { throwError } from "../utils/helperFunctions.js";
-import Users from "../db/usersSchema.js";
+import Users from "../models/usersSchema.js";
 const validatePost = async (req, res, next) => {
   try {
     // Run all validations and sanitizations

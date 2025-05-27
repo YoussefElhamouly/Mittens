@@ -1,6 +1,6 @@
-import Users from "../db/usersSchema.js";
-import Conversation from "../db/conversationSchema.js";
-import Messages from "../db/messagesSchema.js";
+import Users from "../models/usersSchema.js";
+import Conversation from "../models/conversationSchema.js";
+import Messages from "../models/messagesSchema.js";
 import { throwError } from "../utils/helperFunctions.js";
 import { getIO, usersSockets } from "../socket.js";
 import { handleAttachments } from "../utils/processFIles.js";

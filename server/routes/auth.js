@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { checkLogin } from "../middlewares/checkLogin.js";
 import { compare } from "bcrypt";
-import Users from "../db/usersSchema.js";
+import Users from "../models/usersSchema.js";
 
-import Notifications from "../db/notificationSchema.js";
+import Notifications from "../models/notificationSchema.js";
 import { validateRegFormData } from "../middlewares/validators.js";
 
 import { verifyCode, register, logout } from "../controllers/AuthController.js";

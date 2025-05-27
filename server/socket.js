@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { sessionMiddleware } from "./server.js";
-
+import redisClient from "./redis/redisClient.js";
 let io;
 const usersSockets = new Map();
 

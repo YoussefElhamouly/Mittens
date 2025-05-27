@@ -1,16 +1,16 @@
 import { unlink, readFile } from "fs/promises";
 import sharp from "sharp";
-import Followers from "../db/followSchema.js";
+import Followers from "../models/followSchema.js";
 import { broadcastNotifications } from "../utils/helperFunctions.js";
 import mongoose from "mongoose";
-import Pawprints from "../db/pawprintsSchema.js";
+import Pawprints from "../models/pawprintsSchema.js";
 import { throwError } from "../utils/helperFunctions.js";
 import imageType from "image-type";
 
-import Conversation from "../db/conversationSchema.js";
+import Conversation from "../models/conversationSchema.js";
 
-import Users from "../db/usersSchema.js";
-import Notifications from "../db/notificationSchema.js";
+import Users from "../models/usersSchema.js";
+import Notifications from "../models/notificationSchema.js";
 import path from "path";
 import { __uploads, __temp } from "../config.js";
 import { handleAttachments } from "../utils/processFIles.js";

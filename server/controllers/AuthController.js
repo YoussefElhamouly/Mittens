@@ -1,10 +1,10 @@
-import EmailVerification from "../db/emailVerificationSchema.js";
+import EmailVerification from "../models/emailVerificationSchema.js";
 import { getUserAgentData } from "../utils/helperFunctions.js";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
 import { throwError } from "../utils/helperFunctions.js";
 import { hash } from "bcrypt";
-import Users from "../db/usersSchema.js";
+import Users from "../models/usersSchema.js";
 import path from "path";
 import { __uploads, __dirname } from "../config.js";
 import { body, validationResult } from "express-validator";

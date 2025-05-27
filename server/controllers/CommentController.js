@@ -1,9 +1,9 @@
 import { randomBytes } from "crypto";
-import { Posts } from "../db/postsSchema.js";
+import { Posts } from "../models/postsSchema.js";
 import { getIO } from "../socket.js";
-import Users from "../db/usersSchema.js";
-import { Comments } from "../db/commentsSchema.js";
-import CommentsInteraction from "../db/commentsInteractions.js";
+import Users from "../models/usersSchema.js";
+import { Comments } from "../models/commentsSchema.js";
+import CommentsInteraction from "../models/commentsInteractions.js";
 import { param } from "express-validator";
 import path from "path";
 import { __uploads } from "../config.js";

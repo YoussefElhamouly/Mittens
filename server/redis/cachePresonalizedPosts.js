@@ -1,5 +1,5 @@
-import Users from "../db/usersSchema.js";
-import { Posts } from "../db/postsSchema.js";
+import Users from "../models/usersSchema.js";
+import { Posts } from "../models/postsSchema.js";
 import redisClient from "./redisClient.js";
 import { postsAggregationStages } from "../controllers/PostsController.js";
 
