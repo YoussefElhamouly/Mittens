@@ -10,6 +10,8 @@ import { exists } from "fs-extra";
 import { param, validationResult } from "express-validator";
 import Pawprints from "../models/pawprintsSchema.js";
 import fs from "fs";
+import fsPromises from "fs/promises";
+
 import { UAParser } from "ua-parser-js";
 ffmpeg.setFfmpegPath(ffmpegPath);
 function getUserAgentData(req) {
@@ -204,7 +206,7 @@ const LoadVideo = async (req, res) => {
     const { id, type } = req.params;
     const videoPath = path.join(__uploads, `${type}s/${id}`);
 
-    const stat = fs.statSync(videoPath);
+    const stat = await fsPromises.stat(videoPath);
     const fileSize = stat.size;
     const range = req.headers.range;
 

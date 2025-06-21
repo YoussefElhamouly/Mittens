@@ -14,6 +14,7 @@ import { handleErrors } from "./middlewares/errorHandler.js";
 import "./redis/cahceSchedule.js";
 import { connectDB, MONGODB_URI } from "./utils/connectDb.js";
 
+import { __dirname } from "./config.js";
 import {
   LoadImage,
   throwError,
@@ -38,7 +39,9 @@ const sessionMiddleware = session({
     mongoUrl: MONGODB_URI,
     collectionName: "sessions",
   }),
-  cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 * 3, httpOnly: true },
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  },
 });
 app.use(sessionMiddleware);
 
@@ -57,5 +60,5 @@ app.get("/LoadMeowment/:id/:key", LoadMeowment);
 app.get("/loadVideo/:type/:id", LoadVideo);
 
 app.use(handleErrors);
-server.listen(PORT);
+server.listen(PORT, () => {});
 export { sessionMiddleware };

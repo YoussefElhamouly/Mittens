@@ -321,28 +321,45 @@
       }
 
       .chat-header-icon-container {
-        margin-left: auto;
         display: flex;
-        gap: 1rem;
+        gap: 0.5rem;
+        margin-left: auto;
 
         .chat-icon-wrapper {
-          width: 25px;
-          height: 25px;
-          padding: 0.5rem;
+          width: 40px;
+          height: 40px;
           display: flex;
           align-items: center;
           justify-content: center;
-
+          border-radius: 50%;
           cursor: pointer;
+          transition: all 0.2s ease;
+
           &:hover {
-            svg {
-              opacity: 0.8;
-            }
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+          }
+
+          &:active {
+            transform: scale(0.95);
           }
 
           svg {
-            fill: var(--text-color-glowing);
-            opacity: 0.4;
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+          }
+
+          &:hover svg {
+            opacity: 1;
+          }
+        }
+
+        .change-chat-btn {
+          &:hover {
+            background-color: rgba(255, 0, 0, 0.1);
           }
         }
       }

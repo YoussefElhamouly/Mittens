@@ -829,6 +829,10 @@
       }
     }
   }
+
+  .logo-nav-icon .logo-img {
+    display: none !important;
+  }
 }
 
 @media (max-width: 400px) {
@@ -837,5 +841,15 @@
       width: calc(100vw - 50px) !important;
       min-width: 320px !important;
     }
+  }
+}
+
+@media (max-width: 600px) {
+  .plyr__volume {
+    display: none !important;
+  }
+  button.plyr__control[data-plyr='fullscreen'] {
+    /* your styles here */
+    display: none !important;
   }
 }

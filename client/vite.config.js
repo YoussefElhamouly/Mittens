@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   envPrefix: 'VITE_',
   server: {
-    host: true,
-    port: 5173,
+    host: '0.0.0.0',
+    port: 80,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
@@ -23,7 +23,10 @@ export default defineConfig({
     hmr: {
       protocol: 'ws',
       host: '192.168.1.29',
-      port: 5173,
+      port: 80,
     },
+  },
+  build: {
+    chunkSizeWarningLimit: 1600,
   },
 });

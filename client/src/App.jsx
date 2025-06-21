@@ -5,6 +5,7 @@ import ProtectedRoutes from './components/contexts/ProtectedRoutes';
 import { ActiveChatContextProvider } from './components/contexts/ActiveChatContext';
 import { ProfileDataContextProvider } from './components/contexts/ProfileDataContext';
 import { SocketContextProvider } from './components/contexts/SocketContext';
+import CallManager from './components/CallManager';
 import { useDispatch } from 'react-redux';
 import { setIsLoading, setIsLoggedIn, setUserData } from './Redux/Slices/userDataSlice';
 const Login = lazy(() => import('./pages/Login'));
@@ -72,6 +73,7 @@ const App = () => {
 
   return (
     <SocketContextProvider>
+      <CallManager />
       <Suspense>
         <RouterProvider router={router} />
       </Suspense>
