@@ -10,6 +10,7 @@
 - 🐾 Posts supporting Images, Videos, Polls, and Events
 - ❤️ Real-Time Interactions including Likes, Saves, Remeows, and Comments
 - 💬 Real-Time Chat
+- 📞 WebRtc Voice Calls
 
 ---
 
